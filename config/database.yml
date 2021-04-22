@@ -82,5 +82,5 @@ test:
 production:
   <<: *default
   database: visitors_production
-  username: visitors
+  username: deploy
   password: <%= ENV['VISITORS_DATABASE_PASSWORD'] %>
