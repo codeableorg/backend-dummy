@@ -1,4 +1,4 @@
 <h1>Visits</h1>
-<% @visits.each |visit| do %>
+<% @visits.each do |visit| %>
 <p><%= visit.id %> - <%= visit.created_at %></p>
 <% end %>
