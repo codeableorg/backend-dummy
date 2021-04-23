@@ -24,11 +24,12 @@ _Any rails command could be used with heroku run_
 
 1. Create an EC2 Instance.
 2. Select OS, RAM, SSD capacity and open ports.
+3. Copy the server ip
 
-### Connect to the Server
+### Connect to the Server with the IP address
 
 ```bash
-ssh root@1.2.3.4
+ssh ubuntu@<server ip>
 ```
 
 ### Install Ruby dependencies
@@ -37,7 +38,7 @@ ssh root@1.2.3.4
 # Add Node.js repository
 $ curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 # Add Yarn repository
-$  curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+$ curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 $ echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 $ sudo add-apt-repository ppa:chris-lea/redis-server
 # Refresh our packages list with the new repositories
@@ -65,6 +66,7 @@ gem install bundler
 # Make sure bundler is installed correctly, you should see a version number.
 bundle -v
 # Bundler version 2.x
+source ~/.bashrc
 ```
 
 ### Install Postgres
@@ -86,17 +88,19 @@ $ sudo nano /etc/postgresql/{version}/main/pg_hba.conf
 # "local" is for Unix domain socket connections only
 - local   all             all                                     peer
 + local   all             all                                     md5
-# IPv4 local connections:
-- host    all             all             127.0.0.1/32            peer
-+ host    all             all             127.0.0.1/32            md5
 ....
 ```
 
-Create postgres user and database
+Restart postgres service
+
+```bash
+sudo service postgresql restart
+```
+
+Create postgres user
 
 ```bash
 $ sudo -u postgres createuser <username>
-$ sudo -u postgres createdb <dbname>
 ```
 
 Give the user a password
@@ -107,20 +111,14 @@ $ sudo -u postgres psql
 
 ```psql
 psql=# alter user <username> with encrypted password '<password>';
-```
-
-Grant privileges
-
-```psql
-psql=# grant all privileges on database <dbname> to <username> ;
+psql=# alter user <username> with superuser;
 ```
 
 > If you want to just use psql
 >
 > ```
-> CREATE DATABASE <dbname>;
 > CREATE USER <username> WITH ENCRYPTED PASSWORD '<password>';
-> GRANT ALL PRIVILEGES ON DATABASE <dbname> TO <username>;
+> ALTER USER <username> WITH SUPERUSER;
 > ```
 
 ### Install your app
@@ -135,15 +133,22 @@ Create the file `.env` and paste in it the content of your local file.
 
 Create the file `config/master.key` and paste in it the content of your local file.
 
+Install gems
+
+```bash
+$ bundle install
+```
+
 Create the database.
 
 ```bash
 $ RAILS_ENV=production rails db:create
 $ RAILS_ENV=production rails db:migrate
 $ RAILS_ENV=production rails db:seed
+$ sudo nano /config/environments/production.rb
 ```
 
-Change `/config/environments/production.rb`
+Change `production.rb` to be like:
 
 ```diff
 ...
@@ -180,6 +185,7 @@ $ sudo nano /etc/nginx/conf.d/mod-http-passenger.conf
 Change the passenger ruby instruction
 
 ```diff
+- passenger_ruby /usr/bin/passenger_free_ruby;
 + passenger_ruby /home/ubuntu/.rbenv/shims/ruby;
 ```
 
@@ -214,3 +220,11 @@ Comment out all the lines in the file using `#` then update the file accordingly
 +    }
 + }
 ```
+
+Reload nginx service
+
+```bash
+$ sudo service nginx reload
+```
+
+Access your server ip from the browser, look at your deployed repo!
