@@ -112,6 +112,7 @@ $ sudo -u postgres psql
 ```psql
 psql=# alter user <username> with encrypted password '<password>';
 psql=# alter user <username> with superuser;
+psql=# \q
 ```
 
 > If you want to just use psql
