@@ -1,6 +1,7 @@
 FROM ruby:2.7.2
+ENV RAILS_ENV=development
 EXPOSE 3000
-RUN apt update && apt install build-essential postgresql tini -y
+RUN apt update && apt install build-essential sqlite3 tini -y
 RUN mkdir /usr/src/app
 WORKDIR /usr/src/app
 COPY src/Gemfile Gemfile
