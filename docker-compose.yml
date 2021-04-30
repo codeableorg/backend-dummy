@@ -2,7 +2,8 @@ version: "2"
 
 services:
   ror:
-    image: myrails
+    image: my-rails
+    build: .
     ports:
       - "3000:3000"
     volumes:
